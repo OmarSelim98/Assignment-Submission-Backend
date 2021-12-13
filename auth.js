@@ -3,20 +3,20 @@ const db = require("./db");
 const execludedPaths = ["/login", "/auth-required"];
 
 const AuthGuard = (req, res, next) => {
-  if (!execludedPaths.includes(req.path)) {
-    console.log("Auth");
-    if (req.session.loggedin) {
-      next();
-    } else {
-      res.redirect("/auth-required");
-    }
-  } else {
+//   if (!execludedPaths.includes(req.path)) {
+//     console.log("Auth");
+//     if (req.session.loggedin) {
+//       next();
+//     } else {
+//       res.json({ error: "auth" });
+//     }
+//   } else {
     next();
-  }
+ // }
 };
 
 const requiredAuth = (req, res) => {
-  res.json({ error: "you are not logged in" });
+  res.json({ error: "auth" });
   res.end();
 };
 

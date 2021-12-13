@@ -5,6 +5,7 @@ const Assignments = require("./assignments");
 const path = require("path");
 const multer = require("multer");
 const CONSTANTS = require("./constants");
+const cors = require("cors");
 
 const app = express();
 
@@ -36,6 +37,13 @@ const submissions_storage = multer.diskStorage({
 
 const port = process.env.PORT || 8080;
 
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use(
@@ -68,7 +76,10 @@ app.get(
 );
 
 // get assignments for a dr.
-app.get("/:doctor_id/assignments", Assignments.GetAssignmentsByDoctorId);
+app.get(
+  "/assignments/byDoctor/:doctor_id",
+  Assignments.GetAssignmentsByDoctorId
+);
 
 // post a new assignment.
 app.post(

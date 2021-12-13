@@ -4,7 +4,7 @@ const CONSTANTS = require("./constants");
 /** Get All Assignments */
 const GetAllAssignments = async (req, res) => {
   const query =
-    "SELECT assignment.* ,doctor.username,doctor.email FROM assignments AS assignment RIGHT JOIN users AS doctor ON assignment.doctor_id = doctor.id;";
+    "SELECT * FROM assignments as assignment;";
   db.pool.query({ sql: query, nestTables: "_" }, null, (err, results) => {
     res.json({ assignments: results });
   });
@@ -14,7 +14,7 @@ const GetAllAssignments = async (req, res) => {
 const GetSubmissionsForAssignmentById = async (req, res) => {
   const assignment_id = req.params.assignment_id;
   const query =
-    "SELECT * FROM submissions as submission RIGHT JOIN users as student ON submission.student_id = student.id WHERE assignment_id = ?;";
+    "SELECT * FROM submissions as submission RIGHT JOIN users as student ON submission.student_id = student.id AND submission.id IS NOT NULL WHERE assignment_id = ?;";
   db.pool.query(
     { sql: query, nestTables: "_", values: [assignment_id] },
     (err, results) => {
@@ -54,10 +54,11 @@ const AddAssignment = async (req, res) => {
   let details = req.body.details;
   let deadline = req.body.deadline;
   let filename = null;
+  let doctor_id = req.body.doctor_id;
 
   if (req.file) {
     filename = path.resolve(
-      CONSTANTS.ASSIGNMENTS_PATH + "/" + req.file.filename
+      "file://" + CONSTANTS.ASSIGNMENTS_PATH + "/" + req.file.filename
     );
   }
 
@@ -66,7 +67,7 @@ const AddAssignment = async (req, res) => {
   db.pool.query(
     {
       sql: query,
-      values: [name, details, filename, deadline, req.session.user.id],
+      values: [name, details, filename, deadline, doctor_id],
     },
     (err, results) => {
       if (err) {
@@ -85,10 +86,10 @@ const AddAssignment = async (req, res) => {
 /** student: add submission */
 
 const AddSubmission = async (req, res) => {
-  let student_id = req.session.user.id;
+  let student_id = req.body.student_id;
   let assignment_id = req.params.assignment_id;
   let filename = path.resolve(
-    CONSTANTS.SUBMISSIONS_PATH + "/" + req.file.filename
+    "file://" + CONSTANTS.SUBMISSIONS_PATH + "/" + req.file.filename
   );
   const query =
     "INSERT INTO submissions (assignment_id,student_id,submission_file) VALUES (?,?,?);";
